@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="photon/css/photon.min.css">
+    <title>Elevisor Task List!</title>
+    <style>
+        body {
+            background-color: #6d6c6d;
+        }
+    </style>
+
+</head>
+<body>
+<div class="window" style="width:500px;height:200px;left:650px;top:350px">
+
+    <div class="window-content">
+        <form class="padded-less">
+            <div class="form-group">
+                <label>id</label>
+                <input id='gitlab_id' type="text" class="form-control" placeholder="id">
+                <label>password</label>
+                <input id='gitlab_passwd' type="password" class="form-control" placeholder="password">
+            </div>
+        </form>
+    </div>
+
+    <footer class="toolbar toolbar-footer">
+        <div class="toolbar-actions">
+
+            <button class="btn btn-primary pull-right" id="login">
+                Login
+            </button>
+        </div>
+    </footer>
+</div>
+
+</body>
+<script>
+    require('./login.js')
+</script>
+</html>

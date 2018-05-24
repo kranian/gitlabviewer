@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="photon/css/photon.min.css">
+    <title>Elevisor Task List!</title>
+
+    <style>
+        /*.unassigned {*/
+        /*color : slategray;*/
+        /*font-size: 10px;*/
+        /*}*/
+
+        /*thead {*/
+        /*background-color: lightgreen;*/
+        /*}*/
+
+        .fixHeader {
+            position: fixed;
+            top: 75px;
+        }
+
+        span.done {
+            color: #fc6d26;
+            font-weight: bold;
+        }
+
+        /*span.inprogress {*/
+            /*color: blue;*/
+            /*font-weight: bold;*/
+        /*}*/
+
+        td.inprogress {
+            background-color: #38ae67;
+            color: floralwhite;
+        }
+
+        td.done {
+            /*background-color: #b3f6fd;*/
+        }
+
+
+        td, th {
+            padding: 2px 5px;
+            min-width: 34px;
+        }
+
+        tbody tr:hover {
+            background-color: #fece72;
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="window">
+    <!--<header class="toolbar toolbar-header">-->
+    <!--<h1 class="title">Elevisor Task List v0.1</h1>-->
+    <!--</header>-->
+
+    <div class="window-content">
+        <div class="pane-group">
+            <div class="pane pane-sm sidebar">
+                <div class="tab-group">
+                    <div class="tab-item" data-tabid="help">
+                        Help
+                    </div>
+                    <div class="tab-item active" data-tabid="filter">
+                        Filter
+                    </div>
+                </div>
+
+                <div class="pane help " style="display: none">
+                    <ul>
+                        <li>모든 open된 이슈를 한줄에 하나씩 표시합니다.</li>
+                        <li>'구분' 은 gitlab의 project를 기준으로 나뉩니다.</li>
+                        <li>'업무구분' 에는 gitlab의 milestone 이 표시됩니다.</li>
+                        <li>'세부구분' 에는 gitlab의 label이 표시됩니다. 이때 표시할 필요가 없다고 생각되는 일부 라벨은 제거됩니다.</li>
+                        <li>'업무내용' 은 gitlab 이슈의 제목입니다. '작업종료' ,'진행중' label 이 있으면 다른색으로 표시됩니다.</li>
+                        <li>'중요','긴급' 은 gitlab 이슈의 label 이 '중요','긴급' 을 포함하고 있으면 'O' 로 표시됩니다.</li>
+                        <li>'고객사'는 label 끝에 '_cl' 접미어가 붙은걸 추출하여 표시합니다.</li>
+                        <li>이슈 본문에 <b>!DT[2016-10-11 ~ 2016-10-12]</b> 형태로 날자를 입력하면 시작/종료 일자에 표시됩니다.</li>
+                        <li>이슈 본문에 <b>!BG[10억원]</b> 형태로 금액을 입력하면 사업비에 표시됩니다.</li>
+                    </ul>
+                </div>
+
+                <div class="pane pane-sm filter ">
+                    <nav class="nav-group project" data-ctype="project">
+                        <h5 class="nav-group-title">
+                            <span class="icon icon-box"></span> 프로젝트</h5>
+                        <span class="nav-group-item active" data-id="*">
+                            <span class="icon icon-record" style="color:greenyellow"></span>
+                            All
+                        </span>
+
+                    </nav>
+
+                    <nav class="nav-group" data-ctype="progress">
+                        <h5 class="nav-group-title">
+                            <span class="icon icon-clock"></span> 업무내용</h5>
+                        <span class="nav-group-item" data-id="작업종료">
+                            <span class="icon icon-check"></span>
+                            완료
+                        </span>
+                        <span class="nav-group-item" data-id="진행중">
+                            <span class="icon icon-traffic-cone"></span>
+                            진행중
+                        </span>
+                        <span class="nav-group-item" data-id="작업종료,진행중">
+                            <span class="icon icon-arrow-combo"></span>
+                            완료+진행중
+                        </span>
+                        <span class="nav-group-item active" data-id="*">
+                            <span class="icon icon-docs"></span>
+                            모두
+                        </span>
+
+                    </nav>
+
+                    <nav class="nav-group milestone" data-ctype="milestone">
+                        <h5 class="nav-group-title">
+                            <span class="icon icon-address"></span> 업무구분</h5>
+                        <span class="nav-group-item active" data-id="*">
+                            <span class="icon icon-record" style="color:greenyellow"></span>
+                            All
+                        </span>
+
+                    </nav>
+
+
+                    <nav class="nav-group user" data-ctype="user">
+                        <h5 class="nav-group-title">
+                            <span class="icon icon-users"></span> 담당자</h5>
+                        <span class="nav-group-item active" data-id="*">
+                            <span class="icon icon-record" style="color:greenyellow"></span>
+                            All
+                        </span>
+
+                    </nav>
+                </div>
+            </div>
+
+            <div class="pane scroll padded-bottom-more">
+                <header class="toolbar toolbar-header" style="position:fixed; padding-right:225px;width:100%; min-width:1000px; top:0px; min-height:75px">
+                    <div class="btn-group" id="labelBtnGrp">
+                        <button class="btn btn-negative" id="refreshBtn">
+                            <span class="icon icon-arrows-ccw"></span>
+                        </button>
+                        <button class="btn btn-positive" id="clearBtn">Clear</button>
+                    </div>
+                </header>
+
+                <table class='main table-striped' border='1' style='margin-top:75px; border-collapse:collapse;' width='100%'>
+                    <thead>
+                    <tr>
+                        <th>프로젝트</th>
+                        <th class='milestone'>마일스톤</th>
+                        <th class='subject'>세부구분</th>
+                        <th class='user'>담당자</th>
+                        <th>업무내용</th>
+                        <th>중요</th>
+                        <th>긴급</th>
+                        <th>사업비</th>
+                        <th>등록일자</th>
+                        <th>업데이트일자</th>
+                        <th>시작일자</th>
+                        <th>완료예정</th>
+                        <th>이슈#</th>
+                        <th>고객사</th>
+                        <th>비고</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+<dialog id="hello_issue">
+    <header class="toolbar toolbar-header">
+        <h1 class="title"></h1>
+    </header>
+
+    <div style="padding:50px" class="contents">
+    </div>
+
+    <footer class="toolbar toolbar-footer">
+        <div class="toolbar-actions">
+            <button id="cancel" class="btn btn-default">Cancel</button>
+            <button id="save" class="btn btn-primary pull-right">Save</button>
+        </div>
+    </footer>
+</dialog>
+</body>
+<script>
+    require('./render.js')
+</script>
+</html>
